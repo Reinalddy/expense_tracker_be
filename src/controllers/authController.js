@@ -8,6 +8,25 @@ export const register = async (req, res) => {
     const {email, password, name} = req.body;
 
     try {
+        // CEK EMAIL
+        const emailExists = await prisma.user.findUnique({
+            select: {
+              email: true,
+              id: true  
+            },
+            where: {
+                email
+            }
+        });
+
+        if(emailExists) {
+            return res.json({
+                code: 400,
+                message: "Email already exists",
+                data: emailExists
+            });
+        }
+
         const hashed = await bcrypt.hash(password, 10);
 
         const user = await prisma.user.create({
